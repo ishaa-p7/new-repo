@@ -8,6 +8,7 @@ const app = express();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer=require('multer');
+const path=require('path');
 const uploadMiddleware = multer({ dest: 'uploads/' })
 const fs=require('fs');
 
@@ -17,7 +18,7 @@ const secret = 'adfbijcnidjnvsjfnfonsdfmsivsfvn';
 app.use(cors({ credentials: true, origin: 'http://localhost:5173/' }));
 app.use(express.json());
 app.use(cookieParser());
-
+app.use('/api/uploads',express.static(__dirname+'/uploads'))
 
 mongoose.connect('mongodb+srv://blog:blogapp7@cluster7.9isolbc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster7');
 
@@ -83,8 +84,8 @@ app.post('/api/post',uploadMiddleware.single('file'),async (req,res)=>{
   const ext=parts[parts.length-1];
   const newPath=path+'.'+ext;
   fs.renameSync(path,newPath);
-if(token){
   const { token } = req.cookies;
+if(token){
   jwt.verify(token, secret, {},async (err, info) => {
     if (err) throw err;
     const {title,summary,content}=req.body;
@@ -105,7 +106,12 @@ else {
 
 
 app.get('/api/post',async (req,res)=>{
-    res.json(await Post.find().populate('author',['username']));
+    res.json
+    (await Post.find()
+    .populate('author',['username'])
+    .sort({createdAt:-1})
+    .limit(20)
+);
 })
 
 app.listen(4000);
