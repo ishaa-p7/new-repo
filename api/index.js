@@ -83,7 +83,7 @@ app.post('/api/post',uploadMiddleware.single('file'),async (req,res)=>{
   const ext=parts[parts.length-1];
   const newPath=path+'.'+ext;
   fs.renameSync(path,newPath);
-
+if(token){
   const { token } = req.cookies;
   jwt.verify(token, secret, {},async (err, info) => {
     if (err) throw err;
@@ -97,10 +97,15 @@ author:info.id,
   });
   res.json(postDoc);
 });
+}
+else {
+    res.status(400).json({ msg: "no token in cookie" })
+}
 });
 
+
 app.get('/api/post',async (req,res)=>{
-    res.json(await Post.find());
+    res.json(await Post.find().populate('author',['username']));
 })
 
 app.listen(4000);
