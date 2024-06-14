@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect,useContext } from "react";
 import { useState } from "react";
+import { UserContext } from "./UserContext";
 
 export default function Header() {
-  const[username,setUsername]=useState(null);
+  const {setUserInfo,userInfo}=useContext(UserContext);
   useEffect(()=>{
 fetch('/api/profile',{
   credentials:'include',
 }).then(response=>{
 response.json().then(userInfo=>{
-setUsername(userInfo.username);
+setUserInfo(userInfo);
 })
 });
   },[]);
@@ -18,8 +19,11 @@ function logout(){
   fetch('/api/logout',{
     credentials:'include',
     method:'POST',
-  })
+  });
+  setUserInfo(null);
 }
+
+const username=userInfo?.username;
 
   return (
     <header>
@@ -29,7 +33,7 @@ function logout(){
       <nav>
         {username && (
           <>
-          <Link to="/api/create">Create new post</Link>
+          <Link to="/create">Create new post</Link>
           <a onClick={logout}>Logout</a>
           </>
         )}
