@@ -18,6 +18,8 @@ require('dotenv').config()
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.SECRET_KEY;
 
+app.use(express.static(path.join(__dirname , 'dist')))
+
 app.use(cors({ credentials: true, origin: 'http://localhost:5173/' }));
 app.use(express.json());
 app.use(cookieParser());
@@ -163,8 +165,6 @@ app.put('/api/post',upload.single('file'), async (req,res) => {
 
     await Post.updateOne({ _id: id }, updateFields);
     res.json(postDoc)
-
-      res.json(postDoc);
     });
 }
 else {
@@ -187,6 +187,11 @@ const {id}=req.params;
 const postDoc=await Post.findById(id).populate('author',['username']);
 res.json(postDoc);
 })
+
+app.use('*' , (req , res)=>{
+    res.sendFile(path.join(__dirname , 'dist' , 'index.html'))//This is the preferred way
+})
+
 
 app.listen(4000);
 
