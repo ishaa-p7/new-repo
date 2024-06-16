@@ -2,30 +2,23 @@ import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css';
 import {useState} from "react";
 import { Navigate } from "react-router-dom";
+import Editor from "../Editor";
+import PropagateLoader from "react-spinners/PropagateLoader"
 
-const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline','strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-      ['link', 'image'],
-      ['clean']
-    ]
-  };
-
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
-    'link', 'image'
-  ];
 
 export default function CreatePost(){
     const [title,setTitle]=useState('');
     const [summary,setSummary]=useState('');
     const [content,setContent]=useState('');
     const[files,setFiles]=useState('');
-   const [redirect,setRedirect]=useState(false); 
+   const [redirect,setRedirect]=useState(false);
+   const [loading, setLoading] = useState(false);
+
+   const override = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "red",
+};
 
   async function createNewPost(ev){
         const data=new FormData();
@@ -33,12 +26,15 @@ export default function CreatePost(){
         data.set('summary',summary);
         data.set('content',content);
 data.set('file',files[0]);
+
+setLoading(true)
 ev.preventDefault();
 const response=await fetch('/api/post',{
     method:'POST',
     body:data,
     credentials:'include',
     });
+    setLoading(false)
     if(response.ok){
 setRedirect(true);
     }
@@ -46,6 +42,29 @@ setRedirect(true);
 
 if(redirect){
    return <Navigate to={'/'}/>
+}
+
+if (loading) {
+    return (
+        <div style={{
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"center",
+            width:"100%",
+            height:"500px",
+        }}>
+            {loading && (<div>
+                <PropagateLoader
+                    color="#36d7b7"
+                    loading={loading}
+                    cssOverride={override}
+                    size={15}
+                    aria-label="Loading Spinner"
+                    data-testid="loader"
+                />
+            </div>)}
+        </div>
+    )
 }
 
     return(
@@ -61,11 +80,7 @@ if(redirect){
              />
             <input type="file" 
             onChange={ev=>setFiles(ev.target.files)}/>
-            <ReactQuill 
-            value={content} 
-             onChange={newValue=>setContent(newValue)}
-              modules={modules} 
-              formats={formats}/>
+              <Editor value={content} onChange={setContent}/>
             <button style={{marginTop:'5px'}}>Create Post</button>
         </form>
     );

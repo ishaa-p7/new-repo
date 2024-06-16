@@ -33,6 +33,7 @@ const username=userInfo?.username;
       <nav>
         {username && (
           <>
+          <span>Hello,{username}</span>
           <Link to="/create">Create new post</Link>
           <a onClick={logout}>Logout</a>
           </>

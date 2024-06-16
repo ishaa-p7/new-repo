@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cloudinary": "^2.2.0",
+    "react-spinners": "^0.13.8"
+  }
+}
